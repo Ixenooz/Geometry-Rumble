@@ -5,18 +5,19 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-    [SerializeField] int HP;
+    [SerializeField] int maxHP;
+    [SerializeField] int currentHP;
     [SerializeField] string pseudo;
 
     // Fonction pour prendre des dégats
     public void takeDamage(int damage)
     {
-        this.HP -= damage;
+        this.currentHP -= damage;
     }
 
     // Fonction pour récupérer des HP
     public void gainHP(int gain)
     {
-        this.HP += gain;
+        this.currentHP += gain;
     }
 }

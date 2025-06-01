@@ -1,12 +1,12 @@
 # Geometry Rumble 💥
 
-**Un jeu 2D multijoueur PvPvE où des véhicules modifiés s'affrontent dans un monde post-apocalyptique.**  
-*Survie, évolution et trahison au volant !*
+**Un jeu 2D multijoueur PvPvE où des véhicules modifiés s'affrontent sur une map géométrique.**  
+*Survie, évolution et baston au menu !*
 
 ---
 
 ## 📌 Aperçu du projet
-**Geometry Rumble** est un **battle royale 2D** où les joueurs contrôlent des véhicules armés géomtriques, combattant à la fois d'autres joueurs et des IA. Le jeu mélange :
+**Geometry Rumble** est un **battle royale 2D** où les joueurs contrôlent des véhicules armés géométriques, combattant à la fois d'autres joueurs et des IA. Le jeu mélange :
 - **Progression en partie** (améliorations de véhicules, compétences, statistiques).
 - **Mécaniques PvPvE** (joueurs vs joueurs vs environnement).
 - **Univers géometrique dynamique** avec cartes destructibles.

@@ -21,7 +21,11 @@ public class PlayerNetwork : NetworkBehaviour
         HandleMovement();
     }
 
-    private void HandleMovement() {
+    /// <summary>
+    /// Gère le mouvement du joueur en fonction des entrées clavier.
+    /// </summary>
+    private void HandleMovement()
+    {
         // Récupération des inputs
         float moveX = 0f;
         float moveY = 0f;

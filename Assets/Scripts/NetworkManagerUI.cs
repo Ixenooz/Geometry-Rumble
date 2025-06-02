@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class NetworkManagerUI : MonoBehaviour
@@ -13,11 +14,15 @@ public class NetworkManagerUI : MonoBehaviour
         serverBtn.onClick.AddListener(() => {
             NetworkManager.Singleton.StartServer();
         });
-        hostBtn.onClick.AddListener(() => {
+        hostBtn.onClick.AddListener(() =>
+        {
             NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
         });
-        clientBtn.onClick.AddListener(() => {
+        clientBtn.onClick.AddListener(() =>
+        {
             NetworkManager.Singleton.StartClient();
+            NetworkManager.Singleton.SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
         });
     }
 }

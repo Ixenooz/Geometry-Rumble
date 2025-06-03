@@ -3,9 +3,8 @@ using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerNetwork : NetworkBehaviour 
+public class PlayerNetwork : NetworkBehaviour
 {
-    [SerializeField] private Transform spawnedObjectPrefab;
     public float moveSpeed = 3f; // Vitesse de déplacement du joueur
     private Rigidbody2D rb;
     void Start()

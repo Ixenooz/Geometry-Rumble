@@ -329,12 +329,16 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Deletes the currently hosted lobby.
+    /// </summary>
     private void DeleteLobby()
     {
         try
         {
             LobbyService.Instance.DeleteLobbyAsync(joinedLobby.Id);
-        } catch (LobbyServiceException e)
+        }
+        catch (LobbyServiceException e)
         {
             Debug.LogError("Failed to delete lobby: " + e);
         }

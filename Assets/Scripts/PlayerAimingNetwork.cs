@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerAiming : MonoBehaviour
+public class PlayerAiming : NetworkBehaviour
 {
     private Camera mainCamera;
     private Vector3 mousePos;
@@ -18,6 +19,9 @@ public class PlayerAiming : MonoBehaviour
 
     void Update()
     {
+        // On verifie si le joueur est le joueur local, si non on ne fait rien
+        if (!IsOwner) return;
+
         if (mainCamera == null)
         {
             FindMainCamera(); // Try to find the camera again if it's not yet assigned
@@ -28,7 +32,7 @@ public class PlayerAiming : MonoBehaviour
         UpdateMousePos();
 
         // Rotate the sprite to face the mouse position
-        RotateSpriteToMouse();
+        RotateSpriteToMouseServerRpc(mousePos - transform.position);
 
         HandleShooting();
     }
@@ -51,11 +55,11 @@ public class PlayerAiming : MonoBehaviour
     }
 
     /// <summary>
-    /// Rotate the sprite to face the mouse position.
+    /// Server rotates the sprite to face the mouse position.
     /// </summary>
-    private void RotateSpriteToMouse()
+    [ServerRpc(RequireOwnership = false)]
+    private void RotateSpriteToMouseServerRpc(Vector3 rotation)
     {
-        Vector3 rotation = mousePos - transform.position;
         float rotZ = Mathf.Atan2(rotation.y, rotation.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, rotZ - 90f); // Adjusting for the sprite's orientation
     }
@@ -86,7 +90,8 @@ public class PlayerAiming : MonoBehaviour
         if (Input.GetMouseButton(0) && canFire) // Left mouse button
         {
             canFire = false; // Prevent further shooting until the cooldown is over
-            LeftShoot();
+            Vector2 direction = (mousePos - transform.position).normalized;
+            LeftShootServerAuth(direction);
         }
 
         else if (Input.GetMouseButton(1)) // Right mouse button
@@ -95,18 +100,29 @@ public class PlayerAiming : MonoBehaviour
         }
     }
 
-    private void LeftShoot()
+    private void LeftShootServerAuth(Vector2 direction)
     {
         Debug.Log("Left mouse button clicked. Shooting bullet.");
 
-        GameObject bullet = Instantiate(bulletPrefab, pointOfFire.position, Quaternion.identity);
+        LeftShootServerRpc(pointOfFire.position, direction, OwnerClientId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void LeftShootServerRpc(Vector3 position, Vector2 direction, ulong ownerClientId)
+    {
+        Debug.Log($"Server is shooting bullet. OwnerClientId: {ownerClientId}");
+
+        GameObject bullet = Instantiate(bulletPrefab, position, Quaternion.identity); // position = point of fire position
         BulletNetwork bulletNetwork = bullet.GetComponent<BulletNetwork>();
 
         if (bulletNetwork != null)
         {
+            // Spawn the bullet on the network
+            bulletNetwork.GetComponent<NetworkObject>().Spawn();
             // Set the bullet's direction based on the mouse position and the player's position
-            Vector2 direction = (mousePos - transform.position).normalized;
             bulletNetwork.SetDirection(direction);
+            // Assign the shooterClientId to the bullet
+            bulletNetwork.shooterClientId.Value = ownerClientId;
         }
         else
         {

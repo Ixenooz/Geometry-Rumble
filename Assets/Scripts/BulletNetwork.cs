@@ -1,33 +1,41 @@
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BulletNetwork : NetworkBehaviour
 {
+    private Vector3 mousePos; // Position de la souris
+    private Camera mainCamera; // Référence à la caméra principale
     private float speed = 7f; // Vitesse du projectile
-    private Vector2 direction = Vector2.right; // Direction du projectile (par défaut vers la droite)
     private Rigidbody2D rb;
+    private Vector2 direction; // Direction du projectile
 
     // Utiliser une NetworkVariable pour shooterClientId (Assignée via PlayerNetwork)
     public NetworkVariable<ulong> shooterClientId = new NetworkVariable<ulong>();
 
     void Start()
     {
-        // Récupère le composant Rigidbody2D attaché à l'objet
+        mainCamera = Camera.main.GetComponent<Camera>();
         rb = GetComponent<Rigidbody2D>();
-
-        // Définit la vitesse du projectile dès le début
+        mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         rb.linearVelocity = direction.normalized * speed;
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+
+        if (!IsServer)
+        {
+            return; // Ne pas exécuter la logique de collision si ce n'est pas le serveur
+        }
+
         // Ignorer les collisions avec d'autres balles
         if (collision.CompareTag("Bullet"))
         {
             return;
         }
 
-        // Vérifier si la collision est avec un joueur
+        // Si la balle touche un joueur
         if (collision.CompareTag("Player"))
         {
             // Récupérer le NetworkObject du joueur touché
@@ -35,82 +43,74 @@ public class BulletNetwork : NetworkBehaviour
             Debug.Log("Collision entre balle et " + playerHit.OwnerClientId + "; shooterClientId : " + shooterClientId.Value);
 
             // Vérifier si le joueur touché est celui qui a tiré la balle
-            if (playerHit.OwnerClientId == shooterClientId.Value | shooterClientId.Value == 0 & !IsHost)
+            if (playerHit.OwnerClientId == shooterClientId.Value)
             {
-                Debug.Log("Ignore la collision");
-                // Ignorer la collision si c'est le joueur qui a tiré la balle
-                return;
+                Debug.Log("[Ignorer collision] : La balle a touché le joueur qui l'a tirée.");
+                return; // Ignorer la collision si c'est le joueur qui a tiré
             }
 
-            // Envoyer un message au serveur avec les IDs des joueurs concernés
-            if (IsServer)
-            {
-                Debug.Log("HandlePlayerHit : " + playerHit.OwnerClientId + ", " + shooterClientId.Value);
-                HandlePlayerHit(playerHit.OwnerClientId, shooterClientId.Value);
-            }
-            else if (IsClient)
-            {
-                Debug.Log("ReportPlayerHitRpc : " + playerHit.OwnerClientId + ", " + shooterClientId.Value);
-                // Si la balle est sur un client, envoyer une demande au serveur
-                ReportPlayerHitServerRpc(playerHit.OwnerClientId, shooterClientId.Value);
-            }
+            // Logique si la balle touche un joueur différent :
+            Debug.Log("Destruction de la balle.");
+            DestroyBulletServerRpc();
+            UpdatePlayerHealth(collision);
+        }
+    }
 
-            // Détruire la balle
-            if (IsServer)
+    /// <summary>
+    /// Sets the direction of the bullet.
+    /// </summary>
+    public void SetDirection(Vector2 direction)
+    {
+        this.direction = direction;
+    }
+
+    /// <summary>
+    /// Destroys the bullet on the server.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    public void DestroyBulletServerRpc()
+    {
+        Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// Updates the health of the player hit by the bullet.
+    /// </summary>
+    public void UpdatePlayerHealth(Collider2D collision)
+    {
+        if (!IsServer)
+        {
+            return; // Ne pas exécuter la logique de mise à jour de la santé si ce n'est pas le serveur
+        }
+
+        // Récupérer le NetworkHealthState du joueur touché
+        NetworkHealthState healthState = collision.GetComponent<NetworkHealthState>();
+
+        if (healthState != null)
+        {
+            int newHealth = healthState.HealthPoint.Value - 10;
+
+
+            if (newHealth <= 0)
             {
-                Debug.Log("Balle détruite");
-                Destroy(gameObject);
+                healthState.HealthPoint.Value = 0;
+                healthState.IsDead.Value = true; // Marquer le joueur comme mort
+            }
+            else if (newHealth > healthState.MaxHealthPoint.Value)
+            {
+                Debug.LogWarning("La nouvelle santé dépasse la santé maximale. Réinitialisation à la santé maximale.");
+                newHealth = healthState.MaxHealthPoint.Value; // Ne pas dépasser la santé maximale
+            }
+            else
+            {
+                healthState.HealthPoint.Value = newHealth;
             }
         }
         else
         {
-            // Détruire la balle si elle touche autre chose (murs, etc.)
-            if (IsServer)
-            {
-                Debug.Log("Balle détruite");
-                Destroy(gameObject);
-            }
+            Debug.LogWarning("NetworkHealthState component not found on the player object.");
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void ReportPlayerHitServerRpc(ulong playerHitId, ulong shooterId)
-    {
-        HandlePlayerHit(playerHitId, shooterId);
-    }
 
-    private void HandlePlayerHit(ulong playerHitId, ulong shooterId)
-    {
-        PlayerNetwork playerHitNetwork = FindPlayerNetwork(playerHitId); // Script PlayerNetwork du joueur touché
-        PlayerNetwork shooterNetwork = FindPlayerNetwork(shooterId); // Script PlayerNetwork du joueur qui a tiré
-
-        // Logique pour gérer le joueur touché
-        Debug.Log($"Player {playerHitId} was hit by a bullet from Player {shooterId}");
-
-        // Ici ajouter des effets comme réduire la santé du joueur, etc.
-        if (playerHitNetwork != null)
-        {
-            // Appliquer les dégâts au joueur touché
-            playerHitNetwork.GetComponent<Player>().takeDamage(100);
-        }
-
-        if (shooterNetwork != null)
-        {
-            // Augmenter les HP du joueur qui a tiré
-            shooterNetwork.GetComponent<Player>().gainHP(50);
-        }
-    }
-
-    private PlayerNetwork FindPlayerNetwork(ulong clientId)
-    {
-        // Recherche un PlayerNetwork avec le clientId spécifié
-        foreach (PlayerNetwork playerNetwork in FindObjectsByType<PlayerNetwork>(FindObjectsSortMode.None))
-        {
-            if (playerNetwork.OwnerClientId == clientId)
-            {
-                return playerNetwork; // Retourne le PlayerNetwork si trouvé
-            }
-        }
-        return null; // Retourne null si aucun PlayerNetwork n'est trouvé avec le clientId spécifié
-    }
 }

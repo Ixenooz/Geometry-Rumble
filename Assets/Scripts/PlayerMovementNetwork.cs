@@ -4,7 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class PlayerNetwork : NetworkBehaviour
+public class PlayerMovementNetwork : NetworkBehaviour
 {
     public float moveSpeed = 3f; // Vitesse de déplacement du joueur
     private Rigidbody2D rb;

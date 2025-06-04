@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerUI : MonoBehaviour
 {
 
-    [SerializeField] RectTransform healthUI;
+    [SerializeField] RectTransform healthBar;
 
     void OnEnable()
     {
@@ -18,7 +18,7 @@ public class PlayerUI : MonoBehaviour
     
     private void HealthChanged(int oldValue, int newValue)
     {
-        healthUI.transform.localScale = new Vector3(newValue / 100f, 1f, 1f);
+        healthBar.transform.localScale = new Vector3(newValue / 100f, 1f, 1f);
 
     }
 }

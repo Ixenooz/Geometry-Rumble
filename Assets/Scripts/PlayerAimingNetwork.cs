@@ -5,11 +5,13 @@ public class PlayerAiming : NetworkBehaviour
 {
     private Camera mainCamera;
     private Vector3 mousePos;
+    [SerializeField] private Transform core; // Reference to the core of the player, used for rotation
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform pointOfFire; // Point from which the bullet is fired
     private bool canFire = true;
     private float timer;
     [SerializeField] private float fireRate = 0.2f; // Time in seconds between shots
+    [SerializeField] Transform healthUI;
 
     void Start()
     {
@@ -61,7 +63,7 @@ public class PlayerAiming : NetworkBehaviour
     private void RotateSpriteToMouseServerRpc(Vector3 rotation)
     {
         float rotZ = Mathf.Atan2(rotation.y, rotation.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, rotZ - 90f); // Adjusting for the sprite's orientation
+        core.transform.rotation = Quaternion.Euler(0f, 0f, rotZ - 90f); // Adjusting for the core sprite's orientation
     }
 
     /// <summary>

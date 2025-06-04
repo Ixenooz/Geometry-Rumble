@@ -52,7 +52,7 @@ public class BulletNetwork : NetworkBehaviour
             // Logique si la balle touche un joueur différent :
             Debug.Log("Destruction de la balle.");
             DestroyBulletServerRpc();
-
+            UpdatePlayerHealth(collision);
         }
     }
 
@@ -63,7 +63,7 @@ public class BulletNetwork : NetworkBehaviour
     {
         this.direction = direction;
     }
-    
+
     /// <summary>
     /// Destroys the bullet on the server.
     /// </summary>
@@ -73,5 +73,44 @@ public class BulletNetwork : NetworkBehaviour
         Destroy(gameObject);
     }
 
-    
+    /// <summary>
+    /// Updates the health of the player hit by the bullet.
+    /// </summary>
+    public void UpdatePlayerHealth(Collider2D collision)
+    {
+        if (!IsServer)
+        {
+            return; // Ne pas exécuter la logique de mise à jour de la santé si ce n'est pas le serveur
+        }
+
+        // Récupérer le NetworkHealthState du joueur touché
+        NetworkHealthState healthState = collision.GetComponent<NetworkHealthState>();
+
+        if (healthState != null)
+        {
+            int newHealth = healthState.HealthPoint.Value - 10;
+
+
+            if (newHealth <= 0)
+            {
+                healthState.HealthPoint.Value = 0;
+                healthState.IsDead.Value = true; // Marquer le joueur comme mort
+            }
+            else if (newHealth > healthState.MaxHealthPoint.Value)
+            {
+                Debug.LogWarning("La nouvelle santé dépasse la santé maximale. Réinitialisation à la santé maximale.");
+                newHealth = healthState.MaxHealthPoint.Value; // Ne pas dépasser la santé maximale
+            }
+            else
+            {
+                healthState.HealthPoint.Value = newHealth;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("NetworkHealthState component not found on the player object.");
+        }
+    }
+
+
 }

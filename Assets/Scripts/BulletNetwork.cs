@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BulletNetwork : NetworkBehaviour
@@ -22,6 +23,12 @@ public class BulletNetwork : NetworkBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+
+        if (!IsServer)
+        {
+            return; // Ne pas exécuter la logique de collision si ce n'est pas le serveur
+        }
+
         // Ignorer les collisions avec d'autres balles
         if (collision.CompareTag("Bullet"))
         {
@@ -43,8 +50,9 @@ public class BulletNetwork : NetworkBehaviour
             }
 
             // Logique si la balle touche un joueur différent :
+            Debug.Log("Destruction de la balle.");
+            DestroyBulletServerRpc();
 
-            
         }
     }
 
@@ -54,6 +62,15 @@ public class BulletNetwork : NetworkBehaviour
     public void SetDirection(Vector2 direction)
     {
         this.direction = direction;
+    }
+    
+    /// <summary>
+    /// Destroys the bullet on the server.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    public void DestroyBulletServerRpc()
+    {
+        Destroy(gameObject);
     }
 
     

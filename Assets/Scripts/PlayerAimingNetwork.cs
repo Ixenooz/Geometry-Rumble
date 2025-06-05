@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerAiming : NetworkBehaviour
 {
-    [SerializeField] private Camera mainCamera;
+    [SerializeField] private Camera mainCamera; // Reference to the main camera in prefab
     private Vector3 mousePos;
     [SerializeField] private Transform core; // Reference to the core of the player, used for rotation
     [SerializeField] private GameObject bulletPrefab;

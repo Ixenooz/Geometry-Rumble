@@ -7,12 +7,12 @@ public class PlayerUI : MonoBehaviour
 
     void OnEnable()
     {
-        GetComponent<NetworkHealthState>().HealthPoint.OnValueChanged += HealthChanged;
+        GetComponent<HealthStateNetwork>().HealthPoint.OnValueChanged += HealthChanged;
     }
 
     void OnDisable()
     {
-        GetComponent<NetworkHealthState>().HealthPoint.OnValueChanged -= HealthChanged;
+        GetComponent<HealthStateNetwork>().HealthPoint.OnValueChanged -= HealthChanged;
     }
     
     

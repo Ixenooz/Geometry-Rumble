@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class NetworkHealthState : NetworkBehaviour
+public class HealthStateNetwork : NetworkBehaviour
 {
     public NetworkVariable<int> HealthPoint = new NetworkVariable<int>(); // Serveur uniquement doit changer la valeur
     public NetworkVariable<int> MaxHealthPoint = new NetworkVariable<int>(); // Valeur maximale de la santé

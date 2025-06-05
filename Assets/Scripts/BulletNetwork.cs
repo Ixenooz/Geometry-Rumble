@@ -80,7 +80,7 @@ public class BulletNetwork : NetworkBehaviour
         }
 
         // Récupérer le NetworkHealthState du joueur touché
-        NetworkHealthState healthState = collision.GetComponent<NetworkHealthState>();
+        HealthStateNetwork healthState = collision.GetComponent<HealthStateNetwork>();
 
         if (healthState != null)
         {

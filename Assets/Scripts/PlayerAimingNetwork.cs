@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerAiming : NetworkBehaviour
 {
-    private Camera mainCamera;
+    [SerializeField] private Camera mainCamera;
     private Vector3 mousePos;
     [SerializeField] private Transform core; // Reference to the core of the player, used for rotation
     [SerializeField] private GameObject bulletPrefab;
@@ -15,20 +15,13 @@ public class PlayerAiming : NetworkBehaviour
 
     void Start()
     {
-        // Find the main camera by tag
-        FindMainCamera();
+
     }
 
     void Update()
     {
         // On verifie si le joueur est le joueur local, si non on ne fait rien
         if (!IsOwner) return;
-
-        if (mainCamera == null)
-        {
-            FindMainCamera(); // Try to find the camera again if it's not yet assigned
-            if (mainCamera == null) return; // Exit if camera is still not found
-        }
 
         // Get the mouse position in world space
         UpdateMousePos();

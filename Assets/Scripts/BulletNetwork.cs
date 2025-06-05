@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class BulletNetwork : NetworkBehaviour
 {
-    private Vector3 mousePos; // Position de la souris
-    private Camera mainCamera; // Référence à la caméra principale
     private float speed = 7f; // Vitesse du projectile
     private Rigidbody2D rb;
     private Vector2 direction; // Direction du projectile
@@ -15,9 +13,7 @@ public class BulletNetwork : NetworkBehaviour
 
     void Start()
     {
-        mainCamera = Camera.main.GetComponent<Camera>();
         rb = GetComponent<Rigidbody2D>();
-        mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         rb.linearVelocity = direction.normalized * speed;
     }
 
@@ -38,8 +34,8 @@ public class BulletNetwork : NetworkBehaviour
         // Si la balle touche un joueur
         if (collision.CompareTag("Player"))
         {
-            // Récupérer le NetworkObject du joueur touché
-            NetworkObject playerHit = collision.GetComponent<NetworkObject>();
+            // Récupérer le NetworkObject du joueur touché (dans le parent du collider)
+            NetworkObject playerHit = collision.GetComponentInParent<NetworkObject>();
             Debug.Log("Collision entre balle et " + playerHit.OwnerClientId + "; shooterClientId : " + shooterClientId.Value);
 
             // Vérifier si le joueur touché est celui qui a tiré la balle

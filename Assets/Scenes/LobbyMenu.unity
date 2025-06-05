@@ -325,7 +325,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!114 &519420030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1233,11 +1233,11 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1602940158}
-    PlayerPrefab: {fileID: 3258933237172009959, guid: 7c218e4aefd329d429c45c2794653bf2, type: 3}
+    PlayerPrefab: {fileID: 3258933237172009959, guid: 5cc3dee0187e86d419d6be99fd9a198b, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: d126836107fd74345aade9d0f7173b7a, type: 2}
-    TickRate: 120
+    TickRate: 50
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
     ConnectionData: 
